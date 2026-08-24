@@ -41,7 +41,7 @@ name = "TP01"
 -- >>> max' (-1) (-3)
 -- -1
 max' :: (Ord a) => a -> a -> a
-max' a b = error "No implementado"
+max' a b = if a > b then a else b
 
 -- | 'max3' devuelve el valor máximo de tres elementos
 --
@@ -54,7 +54,17 @@ max' a b = error "No implementado"
 -- >>> max3 [1,2,3] [1,2] []
 -- [1,2,3]
 max3 :: (Ord a) => a -> a -> a -> a
-max3 a b c = error "No implementado"
+max3 a b c = max' (max' a b) c
+-- o tambien:
+-- max3 a b c = if a > b && a > c then a else if b > c then b else c
+
+-- | 'min'' devuelve el mínimo entre dos elementos
+min' :: (Ord a) => a -> a -> a
+min' a b = if a < b then a else b
+
+-- | 'min3' devuelve el valor mínimo de tres elementos
+min3 :: (Ord a) => a -> a -> a -> a
+min3 a b c = min' (min' a b) c
 
 -- | 'sum2' recibe tres números y devuelve la suma de los dos mayores
 --
@@ -67,7 +77,7 @@ max3 a b c = error "No implementado"
 -- >>> sum2 8 0 8
 -- 16
 sum2 :: (Ord a, Num a) => a -> a -> a -> a
-sum2 a b c = error "No implementado"
+sum2 a b c = a + b + c - min3 a b c
 
 -- | 'factorial' calcula el factorial de un número entero (Integer)
 --
@@ -82,7 +92,7 @@ sum2 a b c = error "No implementado"
 -- >>> factorial 50
 -- 30414093201713378043612608166064768844377641568960512000000000000
 factorial :: Integer -> Integer
-factorial n = error "No implementado"
+factorial n = if n <= 1 then 1 else n * factorial (n -1)
 
 -- | 'fibo' calcula el enésimo número de Fibonacci \(F(n)\) donde
 -- \(F(n) = F(n-1) + F(n-2)\)
@@ -98,7 +108,7 @@ factorial n = error "No implementado"
 -- >>> fibo 34
 -- 5702887
 fibo :: Integer -> Integer
-fibo n = error "No implementado"
+fibo n = if n > 1 then fibo (n -1) + fibo (n -2) else n
 
 -- | 'square' calcula el cuadrado de un número
 --
@@ -111,7 +121,7 @@ fibo n = error "No implementado"
 -- >>> square 99
 -- 9801
 square :: (Num a) => a -> a
-square x = error "No implementado"
+square x = x * x
 
 -- | 'pow' x eleva un entero a una potencia entera. Si se invoca con un
 -- exponente negativo produce el error @Negative exponent@
@@ -128,7 +138,7 @@ square x = error "No implementado"
 -- *** Exception: Negative exponent
 -- ...
 pow :: (Integral a) => a -> a -> a
-pow x n = error "No implementado"
+pow x n = if n < 0 then error "Negative exponent" else if n == 0 then 1 else x * pow x (n -1)
 
 -- | 'sumsquares' calcula la suma de los cuadrados de los números en un rango
 --
@@ -139,7 +149,7 @@ pow x n = error "No implementado"
 -- >>> sumsquares 5 4
 -- 0
 sumsquares :: (Ord a, Integral a) => a -> a -> a
-sumsquares a b = error "No implementado"
+sumsquares a b = if a < b then pow a 2 + sumsquares (a +1) b else if a == b then pow b 2 else 0
 
 -- | 'sumpowers' calcula la suma de la enésima potencia de los números en un
 -- rango. Si el rango no está vacío, y el exponente es negativo, produce el
@@ -159,7 +169,7 @@ sumsquares a b = error "No implementado"
 -- *** Exception: Negative exponent
 -- ...
 sumpowers :: (Ord a, Integral a) => a -> a -> a -> a
-sumpowers a b n = error "No implementado"
+sumpowers a b n = if n < 0 then error "Negative exponent" else if a < b then pow a n + sumpowers (a +1) b n else if a == b then pow b n else 0
 
 -- | 'sumcubes' calcula la suma de los cubos de los números en un rango.
 --
@@ -172,7 +182,16 @@ sumpowers a b n = error "No implementado"
 -- >>> sumcubes 3 4
 -- 91
 sumcubes :: (Ord a, Integral a) => a -> a -> a
-sumcubes a b = error "No implementado"
+sumcubes a b = if a < b then pow a 3 + sumcubes (a +1) b else if a == b then pow b 3 else 0
+
+-- | 'absoluto' calcula el valor absoluto de un número
+absoluto :: Double -> Double
+absoluto x = if x < 0 then -x else x
+
+-- | 'discriminante' calcula el discriminante de la ecuación de segundo grado
+-- \(ax^2 + bx + c = 0\)
+discriminante :: Double -> Double -> Double -> Double
+discriminante a b c = b * b - 4 * a * c
 
 -- | 'quadraticroots' calcula las raíces de la ecuación de segundo grado
 -- \(ax^2 + bx + c = 0\)
@@ -190,7 +209,15 @@ sumcubes a b = error "No implementado"
 -- *** Exception: bad equation
 -- ...
 quadraticroots :: Double -> Double -> Double -> ((Double, Double), (Double, Double))
-quadraticroots a b c = error "No implementado"
+quadraticroots a b c = if a == 0
+  then error "bad equation"
+  else if discriminante a b c >= 0
+    then
+      ( ((-b + sqrt (discriminante a b c)) / (2 * a), 0),
+        ((-b - sqrt (discriminante a b c)) / (2 * a), 0) )
+    else
+      ( (-b / (2 * a), sqrt (absoluto (discriminante a b c)) / (2 * a)),
+        (-b / (2 * a), -sqrt (absoluto (discriminante a b c)) / (2 * a)) )
 
 -- | 'not'' implementa la función lógica "no"
 --
@@ -201,7 +228,7 @@ quadraticroots a b c = error "No implementado"
 -- >>> not' True
 -- False
 not' :: Bool -> Bool
-not' b = error "No implementado"
+not' b = if b then False else True
 
 -- | 'or'' implementa la función lógica "o"
 --
@@ -218,7 +245,7 @@ not' b = error "No implementado"
 -- >>> False `or'` False
 -- False
 or' :: Bool -> Bool -> Bool
-or' a b = error "No implementado"
+or' a b = if a then True else b
 
 -- | 'xor'' implementa la función lógica "o" exclusiva
 --
@@ -235,7 +262,7 @@ or' a b = error "No implementado"
 -- >>> False `xor'` False
 -- False
 xor' :: Bool -> Bool -> Bool
-xor' a b = error "No implementado"
+xor' a b = if a then not' b else b
 
 -- | 'and'' implementa la función lógica "y"
 --
@@ -252,4 +279,4 @@ xor' a b = error "No implementado"
 -- >>> False `and'` False
 -- False
 and' :: Bool -> Bool -> Bool
-and' a b = error "No implementado"
+and' a b = if a then b else False

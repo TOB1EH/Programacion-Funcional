@@ -39,7 +39,10 @@ name = "TP03"
 -- >>> length' []
 -- 0
 length' :: [a] -> Int
-length' xs = error "No implementado"
+length' xs = contar 0 xs
+  where
+    contar acc [] = acc
+    contar acc (_:xs) = contar (acc + 1) xs
 
 -- | 'sum'' calcula la suma de una lista finita de números
 --
@@ -52,7 +55,10 @@ length' xs = error "No implementado"
 -- >>> sum' []
 -- 0
 sum' :: (Num a) => [a] -> a
-sum' xs = error "No implementado"
+sum' xs = sumar 0 xs
+  where
+    sumar acc [] = acc
+    sumar acc (x:xs) = sumar (acc + x) xs
 
 -- | 'product'' calcula el producto de una lista finita de números
 --
@@ -65,7 +71,10 @@ sum' xs = error "No implementado"
 -- >>> product' []
 -- 1
 product' :: (Num a) => [a] -> a
-product' xs = error "No implementado"
+product' xs = multi 1 xs
+ where
+  multi acc [] = acc
+  multi acc (x:xs) = multi (acc * x) xs
 
 -- | 'reverse'' toma una lista y la invierte
 --
@@ -80,7 +89,10 @@ product' xs = error "No implementado"
 -- >>> reverse' (reverse' [1..10])
 -- [1,2,3,4,5,6,7,8,9,10]
 reverse' :: [a] -> [a]
-reverse' xs = error "No implementado"
+reverse' xs = reverso [] xs
+  where
+    reverso acc [] = acc
+    reverso acc (x:xs) = reverso (x : acc) xs
 
 -- | 'maximum'' devuelve el máximo de una lista de elementos
 --
@@ -100,7 +112,11 @@ reverse' xs = error "No implementado"
 -- *** Exception: empty list
 -- ...
 maximum' :: (Ord a) => [a] -> a
-maximum' xs = error "No implementado"
+maximum' [] = error "empty list"
+maximum' (x:xs) = maximo x xs
+ where
+  maximo x [] = x
+  maximo x (y:xs) = maximo (max x y) xs
 
 -- | 'minimum'' devuelve el minimo de una lista de elementos
 --
@@ -120,7 +136,11 @@ maximum' xs = error "No implementado"
 -- *** Exception: empty list
 -- ...
 minimum' :: (Ord a) => [a] -> a
-minimum' xs = error "No implementado"
+minimum' [] = error "empty list"
+minimum' (x:xs) = minimo x xs
+  where
+    minimo x [] = x
+    minimo x (y:xs) = minimo (min x y) xs
 
 -- | 'factorial' calcula el factorial de un número entero (Integer)
 --
@@ -135,7 +155,10 @@ minimum' xs = error "No implementado"
 -- >>> factorial 50
 -- 30414093201713378043612608166064768844377641568960512000000000000
 factorial :: Integer -> Integer
-factorial n = error "No implementado"
+factorial n = fact 1 n
+  where
+    fact acc 0 = acc
+    fact acc n = fact (acc * n) (n - 1)
 
 -- | 'fibo' calcula el enésimo número de Fibonacci F(n) donde F(n) = F(n-1) + F(n-2)
 --
@@ -150,7 +173,10 @@ factorial n = error "No implementado"
 -- >>> fibo 42
 -- 267914296
 fibo :: Integer -> Integer
-fibo n = error "No implementado"
+fibo n = fib 0 1 n
+  where
+    fib a b 0 = a
+    fib a b n = fib b (a + b) (n - 1)
 
 -- | 'pow' x eleva un entero a una potencia entera
 --
@@ -163,7 +189,10 @@ fibo n = error "No implementado"
 -- >>> pow 3 0
 -- 1
 pow :: (Integral a) => a -> a -> a
-pow x n = error "No implementado"
+pow x n = potencia 1 n
+  where
+    potencia acc 0 = acc
+    potencia acc n = potencia (acc * x) (n - 1)
 
 -- | 'sumsquares' calcula la suma de los cuadrados de los números en un rango
 --
@@ -174,7 +203,12 @@ pow x n = error "No implementado"
 -- >>> sumsquares 5 4
 -- 0
 sumsquares :: (Ord a, Integral a) => a -> a -> a
-sumsquares a b = error "No implementado"
+sumsquares a b = sumas2 0 a b
+  where
+    sumas2 acc a b
+      | a > b     = acc
+      | a == b    = acc + pow a 2
+      | otherwise = sumas2 (acc + pow a 2) (a + 1) b
 
 -- | 'sumpowers' calcula la suma de la enésima potencia de los números en un rango
 --
@@ -187,7 +221,12 @@ sumsquares a b = error "No implementado"
 -- >>> sumpowers 0 10 1
 -- 55
 sumpowers :: (Ord a, Integral a) => a -> a -> a -> a
-sumpowers a b n = error "No implementado"
+sumpowers a b n = sumaN 0 a b n
+  where
+    sumaN acc a b n
+      | a > b = acc
+      | a == b = acc + pow a n
+      | otherwise = sumaN (acc + pow a n) (a + 1) b n
 
 -- | 'sumcubes' calcula la suma de los cubos de los números en un rango
 --
@@ -200,4 +239,9 @@ sumpowers a b n = error "No implementado"
 -- >>> sumcubes 3 4
 -- 91
 sumcubes :: (Ord a, Integral a) => a -> a -> a
-sumcubes a b = error "No implementado"
+sumcubes a b = suma3 0 a b
+  where
+    suma3 acc a b
+      | a > b = acc
+      | a == b = acc + pow a 3
+      | otherwise = suma3 (acc + pow a 3) (a + 1) b

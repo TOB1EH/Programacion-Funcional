@@ -48,7 +48,9 @@ name = "TP02"
 -- *** Exception: empty list
 -- ...
 head' :: [a] -> a
-head' xs = if null' xs then error "empty list" else xs `at` 0
+head' []    = error "empty list"
+head' (x:_) = x
+-- head' xs = if null' xs then error "empty list" else xs `at` 0
 
 -- | 'tail'' devuelve todos los elementos de una lista no vacia excepto el primero
 --
@@ -64,9 +66,12 @@ head' xs = if null' xs then error "empty list" else xs `at` 0
 -- *** Exception: empty list
 -- ...
 tail' :: [a] -> [a]
-tail' xs = if null' xs then error "empty list" else x
-  where
-    (_:x) = xs
+tail' []     = error "empty list"
+tail' (_:xs) = xs
+-- tail' :: [a] -> [a]
+-- tail' xs = if null' xs then error "empty list" else x
+--   where
+--     (_:x) = xs
 
 
 -- | 'last'' toma una lista y devuelve su último elemento
@@ -83,10 +88,14 @@ tail' xs = if null' xs then error "empty list" else x
 -- *** Exception: empty list
 -- ...
 last' :: [a] -> a
-last' xs = if null' xs then error "empty list" else n
-  where
-    i = length' xs - 1
-    n = xs `at` i
+last' []     = error "empty list"
+last' [x]    = x
+last' (_:xs) = last' xs
+-- last' :: [a] -> a
+-- last' xs = if null' xs then error "empty list" else n
+--   where
+--     i = length' xs - 1
+--     n = xs `at` i
 
 -- | 'init'' toma una lista y devuelve todo excepto el último elemento
 --
@@ -102,7 +111,10 @@ last' xs = if null' xs then error "empty list" else n
 -- *** Exception: empty list
 -- ...
 init' :: [a] -> [a]
-init' xs = if null' xs then error "empty list" else if null' (tail' xs) then [] else head' xs : init' (tail' xs)
+init' []     = error "empty list"
+init' [_]    = []
+init' (x:xs) = x : init' xs
+-- init' xs = if null' xs then error "empty list" else if null' (tail' xs) then [] else head' xs : init' (tail' xs)
 
 -- | 'length'' devuelve la longitud de una lista finita como un entero (Int)
 --
@@ -115,7 +127,9 @@ init' xs = if null' xs then error "empty list" else if null' (tail' xs) then [] 
 -- >>> length' []
 -- 0
 length' :: [a] -> Int
-length' xs = if null' xs then 0 else 1 + length' (tail' xs)
+length' []     = 0
+length' (_:xs) = 1 + length' xs
+-- length' xs = if null' xs then 0 else 1 + length' (tail' xs)
 
 -- | 'sum'' calcula la suma de una lista finita de números
 --
@@ -128,7 +142,9 @@ length' xs = if null' xs then 0 else 1 + length' (tail' xs)
 -- >>> sum' []
 -- 0
 sum' :: (Num a) => [a] -> a
-sum' xs = if null' xs then 0 else head' xs + sum' (tail' xs)
+sum' []     = 0
+sum' (x:xs) = x + sum' xs
+-- sum' xs = if null' xs then 0 else head' xs + sum' (tail' xs)
 
 -- | 'product'' calcula el producto de una lista finita de números
 --
@@ -141,7 +157,9 @@ sum' xs = if null' xs then 0 else head' xs + sum' (tail' xs)
 -- >>> product' []
 -- 1
 product' :: (Num a) => [a] -> a
-product' xs = if null' xs then 1 else head' xs * product' (tail' xs)
+product' []     = 1
+product' (x:xs) = x * product' xs
+-- product' xs = if null' xs then 1 else head' xs * product' (tail' xs)
 
 -- | 'null'' devuelve verdadero si una lista está vacía y falso en caso contrario
 --
@@ -157,7 +175,7 @@ product' xs = if null' xs then 1 else head' xs * product' (tail' xs)
 -- True
 null' :: [a] -> Bool
 null' [] = True
-null' xs = False
+null' _ = False
 
 -- | (+++) concatena dos listas
 --
@@ -174,7 +192,9 @@ null' xs = False
 -- >>> [] +++ []
 -- []
 (+++) :: [a] -> [a] -> [a]
-xs +++ ys = if null' xs then ys else head' xs : (tail' xs +++ ys)
+[]     +++ ys = ys
+(x:xs) +++ ys = x : (xs +++ ys)
+-- xs +++ ys = if null' xs then ys else head' xs : (tail' xs +++ ys)
 
 -- | 'at' xs n devuelve el enésimo elemento de la lista (se comporta como (!!))
 --
@@ -195,11 +215,18 @@ xs +++ ys = if null' xs then ys else head' xs : (tail' xs +++ ys)
 -- *** Exception: negative index
 -- ...
 at :: [a] -> Int -> a
-at xs n = if n < 0 then error "negative index" else buscar xs n
+at xs n
+  | n < 0     = error "negative index"
+  | otherwise = buscar xs n
   where
     buscar []     _ = error "index too large"
     buscar (x:_)  0 = x
     buscar (_:xs) i = buscar xs (i - 1)
+-- at xs n = if n < 0 then error "negative index" else buscar xs n
+--   where
+--     buscar []     _ = error "index too large"
+--     buscar (x:_)  0 = x
+--     buscar (_:xs) i = buscar xs (i - 1)
 
 -- | 'elem'' x xs devuelve verdadero si x está en xs y falso en caso contrario
 --
@@ -216,7 +243,9 @@ at xs n = if n < 0 then error "negative index" else buscar xs n
 -- >>> 'h' `elem'` "Hola"
 -- False
 elem' :: (Eq a) => a -> [a] -> Bool
-elem' e xs = if null' xs then False else if (head' xs) == e then True else elem' e (tail' xs)
+elem' _ []     = False
+elem' e (x:xs) = x == e || elem' e xs
+-- elem' e xs = if null' xs then False else if (head' xs) == e then True else elem' e (tail' xs)
 
 
 -- | 'take'' n xs devuelve una lista con los primeros n elementos de xs
@@ -232,12 +261,15 @@ elem' e xs = if null' xs then False else if (head' xs) == e then True else elem'
 -- >>> take' 10 [1,3..]
 -- [1,3,5,7,9,11,13,15,17,19]
 take' :: Int -> [a] -> [a]
-take' n xs = if n <= 0 then [] else buscar xs n
-  where
-    buscar []     _ = []
-    buscar (_:_)  0 = []
-    buscar (x:_)  1 = [x]
-    buscar xs     i = [(head' xs)] +++ buscar (tail' xs) (i - 1)
+take' n _ | n <= 0 = []
+take' _ []         = []
+take' n (x:xs)     = x : take' (n - 1) xs
+-- take' n xs = if n <= 0 then [] else buscar xs n
+--   where
+--     buscar []     _ = []
+--     buscar (_:_)  0 = []
+--     buscar (x:_)  1 = [x]
+--     buscar xs     i = [(head' xs)] +++ buscar (tail' xs) (i - 1)
 
 -- | 'drop'' n xs devuelve una lista en la que se han descartado los primeros
 -- n elementos de xs
@@ -255,11 +287,14 @@ take' n xs = if n <= 0 then [] else buscar xs n
 -- >>> drop' 5 [1,3..15]
 -- [11,13,15]
 drop' :: Int -> [a] -> [a]
-drop' n xs = if n <= 0 then xs else buscar xs n
-  where
-    buscar []     _ = []
-    buscar xs     0 = xs
-    buscar xs     i = [] +++ buscar (tail' xs) (i - 1)
+drop' n xs | n <= 0 = xs
+drop' _ []          = []
+drop' n (_:xs)      = drop' (n - 1) xs
+-- drop' n xs = if n <= 0 then xs else buscar xs n
+--   where
+--     buscar []     _ = []
+--     buscar xs     0 = xs
+--     buscar xs     i = [] +++ buscar (tail' xs) (i - 1)
 
 -- | 'reverse'' toma una lista y la invierte
 --
@@ -274,7 +309,9 @@ drop' n xs = if n <= 0 then xs else buscar xs n
 -- >>> reverse' (reverse' [1..10])
 -- [1,2,3,4,5,6,7,8,9,10]
 reverse' :: [a] -> [a]
-reverse' xs = if null' xs then [] else [(last' xs)] +++ reverse' (init' xs)
+reverse' []     = []
+reverse' (x:xs) = reverse' xs +++ [x]
+-- reverse' xs = if null' xs then [] else [(last' xs)] +++ reverse' (init' xs)
 
 -- | 'maximum'' devuelve el máximo de una lista de elementos
 --
@@ -294,7 +331,10 @@ reverse' xs = if null' xs then [] else [(last' xs)] +++ reverse' (init' xs)
 -- *** Exception: empty list
 -- ...
 maximum' :: (Ord a) => [a] -> a
-maximum' xs = if null' xs then error "empty list" else if null' (tail' xs) then head' xs else max (head' xs) (maximum' (tail' xs))
+maximum' []     = error "empty list"
+maximum' [x]    = x
+maximum' (x:xs) = max x (maximum' xs)
+-- maximum' xs = if null' xs then error "empty list" else if null' (tail' xs) then head' xs else max (head' xs) (maximum' (tail' xs))
 
 -- | 'minimum'' devuelve el minimo de una lista de elementos
 --
@@ -314,7 +354,10 @@ maximum' xs = if null' xs then error "empty list" else if null' (tail' xs) then 
 -- *** Exception: empty list
 -- ...
 minimum' :: (Ord a) => [a] -> a
-minimum' xs = if null' xs then error "empty list" else if null' (tail' xs) then head' xs else min (head' xs) (minimum' (tail' xs))
+minimum' []     = error "empty list"
+minimum' [x]    = x
+minimum' (x:xs) = min x (minimum' xs)
+-- minimum' xs = if null' xs then error "empty list" else if null' (tail' xs) then head' xs else min (head' xs) (minimum' (tail' xs))
 
 -- | 'repeat'' toma un elemento y devuelve una lista infinita de ese elemento
 --
@@ -331,7 +374,8 @@ minimum' xs = if null' xs then error "empty list" else if null' (tail' xs) then 
 -- >>> take 5 (repeat' "")
 -- ["","","","",""]
 repeat' :: a -> [a]
-repeat' x = [x] +++ repeat x
+repeat' x = x : repeat' x
+-- repeat' x = [x] +++ repeat x
 
 -- | 'cycle'' toma una lista no vacía y la reproduce infinitamente
 --
@@ -347,7 +391,9 @@ repeat' x = [x] +++ repeat x
 -- *** Exception: empty list
 -- ...
 cycle' :: [a] -> [a]
-cycle' xs = if null' xs then error "empty list" else xs +++ cycle' xs
+cycle' [] = error "empty list"
+cycle' xs = xs +++ cycle' xs
+-- cycle' xs = if null' xs then error "empty list" else xs +++ cycle' xs
 
 -- | 'replicate' n x devuelve una lista con n copias de x
 --
@@ -371,9 +417,10 @@ replicate' n x = take' n (repeat' x)
 -- >>> fst' (True, 'a')
 -- True
 fst' :: (a, b) -> a
-fst' pair = x
-  where
-    (x, _) = pair
+fst' (x, _) = x
+-- fst' pair = x
+--   where
+--     (x, _) = pair
 
 -- | 'snd'' devuelve el segundo elemento de un par
 --
@@ -384,9 +431,10 @@ fst' pair = x
 -- >>> snd' (True, 'a')
 -- 'a'
 snd' :: (a, b) -> b
-snd' pair = y
-  where
-    (_, y) = pair
+snd' (_, y) = y
+-- snd' pair = y
+--   where
+--     (_, y) = pair
 
 -- | 'zip'' recibe dos listas y devuelve una lista de pares
 --
@@ -404,7 +452,10 @@ snd' pair = y
 -- >>> zip' "Hola" "Haskell"
 -- [('H','H'),('o','a'),('l','s'),('a','k')]
 zip' :: [a] -> [b] -> [(a, b)]
-zip' xs ys = if null' xs || null' ys then [] else [(head' xs , head' ys)] +++ zip' (tail' xs) (tail' ys)
+zip' []     _      = []
+zip' _      []     = []
+zip' (x:xs) (y:ys) = (x, y) : zip' xs ys
+-- zip' xs ys = if null' xs || null' ys then [] else [(head' xs , head' ys)] +++ zip' (tail' xs) (tail' ys)
 
 -- | 'unzip'' recibe una lista de pares y devuelve un par de listas
 --
@@ -419,7 +470,11 @@ zip' xs ys = if null' xs || null' ys then [] else [(head' xs , head' ys)] +++ zi
 -- >>> unzip' [('H','H'),('o','a'),('l','s'),('a','k')]
 -- ("Hola","Hask")
 unzip' :: [(a, b)] -> ([a], [b])
-unzip' xs = if null' xs then ([], []) else (fst (head' xs) : x, snd' (head' xs) : y)
+unzip' []          = ([], [])
+unzip' ((a, b):xs) = (a : as, b : bs)
   where
-    x = fst' (unzip' (tail' xs))
-    y = snd' (unzip' (tail' xs))
+    (as, bs) = unzip' xs
+-- unzip' xs = if null' xs then ([], []) else (fst (head' xs) : x, snd' (head' xs) : y)
+--   where
+--     x = fst' (unzip' (tail' xs))
+--     y = snd' (unzip' (tail' xs))

@@ -75,7 +75,11 @@ data List a = Empty | a ::: List a deriving (Eq, Ord)
 -- >>> show Empty
 -- "[]"
 instance (Show a) => Show (List a) where
-  show = error "No implementado"
+  show xs = "[" ++ intercalate' xs ++ "]"
+    where
+      intercalate' Empty = ""
+      intercalate' (x ::: Empty) = show x
+      intercalate' (y ::: ys) = show y ++ "," ++ intercalate' ys
 
 -- | El tipo de dato 'Pair' representa un par de datos de tipos arbitrarios
 data Pair a b = Pair a b deriving (Eq, Ord)
@@ -90,7 +94,7 @@ data Pair a b = Pair a b deriving (Eq, Ord)
 -- >>> show (Pair 'a' 4.4)
 -- "('a',4.4)"
 instance (Show a, Show b) => Show (Pair a b) where
-  show = error "No implementado"
+  show (Pair a b) = "(" ++ show a ++ "," ++ show b ++ ")"
 
 -- | 'foldr'' aplicado a un operador binario, un valor inicial y una lista,
 -- reduce la lista aplicando el operador de derecha a izquierda.
@@ -105,7 +109,8 @@ instance (Show a, Show b) => Show (Pair a b) where
 -- >>> foldr' (*) 1 Empty
 -- 1
 foldr' :: (a -> b -> b) -> b -> List a -> b
-foldr' = error "No implementado"
+foldr' _ z Empty = z
+foldr' f z (x ::: xs) = f x (foldr' f z xs)
 
 -- | 'foldl'' aplicado a un operador binario, un valor inicial y una lista,
 -- reduce la lista aplicando el operador de izquierda a derecha.
@@ -120,7 +125,8 @@ foldr' = error "No implementado"
 -- >>> foldl' (*) 1 Empty
 -- 1
 foldl' :: (a -> b -> a) -> a -> List b -> a
-foldl' = error "No implementado"
+foldl' _ z Empty = z
+foldl' f z (x ::: xs) = foldl' f (f z x) xs
 
 -- | 'foldr1'' es una variante de foldr' que no toma un valor inicial
 -- y por lo tanto no puede aplicarse sobre listas vacías.
@@ -137,7 +143,9 @@ foldl' = error "No implementado"
 -- *** Exception: empty list
 -- ...
 foldr1' :: (a -> a -> a) -> List a -> a
-foldr1' = error "No implementado"
+foldr1' _ Empty = error "empty list"
+foldr1' _ (x ::: Empty) = x
+foldr1' f (x ::: xs) = f x (foldr1' f xs)
 
 -- | 'foldl1'' es una variante de foldl' que no toma un valor inicial
 -- y por lo tanto no puede aplicarse sobre listas vacías.
@@ -154,7 +162,8 @@ foldr1' = error "No implementado"
 -- *** Exception: empty list
 -- ...
 foldl1' :: (a -> a -> a) -> List a -> a
-foldl1' = error "No implementado"
+foldl1' _ Empty = error "empty list"
+foldl1' f (x ::: xs) = foldl' f x xs
 
 -- Implemente todas las funciones usando foldl', foldr', foldl1', foldr1' o una composición de funciones ya definidas.
 
@@ -168,7 +177,7 @@ foldl1' = error "No implementado"
 -- >>> length' Empty
 -- 0
 length' :: List a -> Int
-length' = error "No implementado"
+length' = foldr' (\_ acc -> acc + 1) 0
 
 -- | 'head'' devuelve el primer elemento de una lista, que no puede ser vacia
 --
@@ -181,7 +190,8 @@ length' = error "No implementado"
 -- ... empty list
 -- ...
 head' :: List a -> a
-head' = error "No implementado"
+head' Empty = error "empty list"
+head' (x ::: _) = x
 
 -- | 'tail'' devuelve todos los elementos de una lista no vacia excepto el
 -- primero
@@ -195,7 +205,8 @@ head' = error "No implementado"
 -- ... empty list
 -- ...
 tail' :: List a -> List a
-tail' = error "No implementado"
+tail' Empty = error "empty list"
+tail' (_ ::: xs) = xs
 
 -- | 'last'' toma una lista y devuelve su último elemento
 --
@@ -208,7 +219,9 @@ tail' = error "No implementado"
 -- *** Exception: empty list
 -- ...
 last' :: List a -> a
-last' = error "No implementado"
+last' Empty= error "empty list"
+last' (x ::: Empty) = x
+last' (_ ::: xs) = last' xs
 
 -- | 'init'' toma una lista y devuelve todo excepto el último elemento
 --
@@ -221,7 +234,9 @@ last' = error "No implementado"
 -- ... empty list
 -- ...
 init' :: List a -> List a
-init' = error "No implementado"
+init' Empty = error "empty list"
+init' (_ ::: Empty) = Empty
+init' (x ::: xs) = x ::: init' xs
 
 -- | 'null'' devuelve verdadero si una lista está vacía y falso en caso
 -- contrario
@@ -233,7 +248,8 @@ init' = error "No implementado"
 -- >>> null' Empty
 -- True
 null' :: List a -> Bool
-null' = error "No implementado"
+null' Empty = True
+null' _ = False
 
 -- | (+++) concatena dos listas
 --
@@ -249,7 +265,8 @@ null' = error "No implementado"
 -- >>> Empty +++ Empty
 -- []
 (+++) :: List a -> List a -> List a
-xs +++ ys = error "No implementado"
+Empty +++ ys = ys
+(x ::: xs) +++ ys = x ::: (xs +++ ys)
 
 -- | 'at' xs n devuelve el enésimo elemento de la lista (se comporta como !!)
 --
@@ -267,7 +284,13 @@ xs +++ ys = error "No implementado"
 -- *** Exception: index too large
 -- ...
 at :: List a -> Int -> a
-at xs n = error "No implementado"
+at xs n
+  | n < 0     = error "negative index"
+  | otherwise = buscar xs n
+  where
+    buscar Empty      _ = error "index too large"
+    buscar (x ::: _)  0 = x
+    buscar (_ ::: ys) i = buscar ys (i - 1)
 
 -- | 'take'' n xs devuelve una lista con los primeros n elementos de xs
 --
@@ -283,7 +306,10 @@ at xs n = error "No implementado"
 -- >>> take' 10 Empty
 -- []
 take' :: Int -> List a -> List a
-take' n xs = error "No implementado"
+take' n _
+  | n <= 0 = Empty
+take' _ Empty = Empty
+take' n (x ::: xs) = x ::: take' (n - 1) xs
 
 -- | 'drop'' n xs devuelve una lista en la que se han descartado los primeros
 -- n elementos de xs
@@ -300,7 +326,10 @@ take' n xs = error "No implementado"
 -- >>> drop' 4 Empty
 -- []
 drop' :: Int -> List a -> List a
-drop' n xs = error "No implementado"
+drop' n xs
+  | n <= 0 = xs
+drop' _ Empty = Empty
+drop' n (_ ::: xs) = drop' (n - 1) xs
 
 -- | 'sum'' calcula la suma de una lista finita de números
 --
@@ -312,7 +341,7 @@ drop' n xs = error "No implementado"
 -- >>> sum' Empty
 -- 0
 sum' :: (Num a) => List a -> a
-sum' = error "No implementado"
+sum' = foldr' (+) 0
 
 -- | 'product'' calcula el producto de una lista finita de números
 --
@@ -324,7 +353,7 @@ sum' = error "No implementado"
 -- >>> product' Empty
 -- 1
 product' :: (Num a) => List a -> a
-product' = error "No implementado"
+product' = foldr' (*) 1
 
 -- | 'reverse'' toma una lista y la invierte
 --
@@ -336,7 +365,8 @@ product' = error "No implementado"
 -- >>> reverse' (reverse' l)
 -- [1,2,3,4,5,6,7,8,9,10]
 reverse' :: List a -> List a
-reverse' = error "No implementado"
+-- reverse' = foldl' (\acc x -> x ::: acc) Empty
+reverse' = foldl' (flip (:::)) Empty
 
 -- | 'maximum'' devuelve el máximo de una lista de elementos
 -- Si la lista está vacía produce un error con el mensaje "empty list"
@@ -353,7 +383,7 @@ reverse' = error "No implementado"
 -- prop> \x -> maximum' (x ::: Empty) == x
 -- +++ OK, passed 100 tests.
 maximum' :: (Ord a) => List a -> a
-maximum' = error "No implementado"
+maximum' = foldl1' max
 
 -- | 'minimum'' devuelve el minimo de una lista de elementos
 -- Si la lista está vacía produce un error con el mensaje "empty list"
@@ -370,7 +400,7 @@ maximum' = error "No implementado"
 -- prop> \x -> minimum' (x ::: Empty) == x
 -- +++ OK, passed 100 tests.
 minimum' :: (Ord a) => List a -> a
-minimum' = error "No implementado"
+minimum' = foldl1' min
 
 -- | 'repeat'' toma un elemento y devuelve una lista infinita de ese elemento.
 --
@@ -381,7 +411,7 @@ minimum' = error "No implementado"
 -- >>> repeat' 9 `at` 1000
 -- 9
 repeat' :: a -> List a
-repeat' x = error "No implementado"
+repeat' x = x ::: repeat' x
 
 -- | 'cycle'' toma una lista no vacía y la reproduce infinitamente.
 --
@@ -391,7 +421,8 @@ repeat' x = error "No implementado"
 -- >>> take' 7 (cycle' l)
 -- [1,2,3,1,2,3,1]
 cycle' :: List a -> List a
-cycle' xs = error "No implementado"
+cycle' Empty = error "empty list"
+cycle' xs = xs +++ cycle' xs
 
 -- | 'replicate' n x devuelve una lista con n copias de x.
 --
@@ -402,7 +433,7 @@ cycle' xs = error "No implementado"
 -- >>> replicate' 5 (1 ::: Empty)
 -- [[1],[1],[1],[1],[1]]
 replicate' :: Int -> a -> List a
-replicate' n x = error "No implementado"
+replicate' n x = take' n (repeat' x)
 
 -- | 'map'' toma una función y una lista y aplica esa función a cada elemento
 -- de la lista.
@@ -420,7 +451,7 @@ replicate' n x = error "No implementado"
 -- >>> map' succ Empty
 -- []
 map' :: (a -> b) -> List a -> List b
-map' = error "No implementado"
+map' f = foldr' (\x acc -> f x ::: acc) Empty
 
 -- | 'filter'' toma un predicado y una lista, y devuelve una nueva lista con
 -- los elementos para los cuales se cumple el predicado.
@@ -438,7 +469,7 @@ map' = error "No implementado"
 -- >>> filter' (\_ -> True) Empty
 -- []
 filter' :: (a -> Bool) -> List a -> List a
-filter' = error "No implementado"
+filter' p = foldr' (\x acc -> if p x then x ::: acc else acc) Empty
 
 -- | 'concat'' concatena una lista de listas
 --
@@ -453,7 +484,7 @@ filter' = error "No implementado"
 -- >>> concat' listOfLists
 -- [1,2,3,4,5,6,7,8,9,10]
 concat' :: List (List a) -> List a
-concat' = error "No implementado"
+concat' = foldr' (+++) Empty
 
 -- | 'and'' devuelve la conjunción de una lista de booleanos.
 -- Para que el resultado sea True, la lista debe ser finita.
@@ -471,7 +502,7 @@ concat' = error "No implementado"
 -- >>> and' (True:::True:::True:::False:::Empty)
 -- False
 and' :: List Bool -> Bool
-and' = error "No implementado"
+and' = foldr' (&&) True
 
 -- | 'or'' devuelve la disyunción de una lista de booleanos.
 -- Para que el resultado sea False, la lista debe ser finita.
@@ -487,7 +518,7 @@ and' = error "No implementado"
 -- >>> or' (map' (==1000) (foldr (:::) Empty [1..]))
 -- True
 or' :: List Bool -> Bool
-or' = error "No implementado"
+or' = foldr' (||) False
 
 -- | 'any'' toma un predicado y una lista y devuelve verdadero si el predicado
 -- se cumple para algún elemento de la lista
@@ -502,7 +533,7 @@ or' = error "No implementado"
 -- >>> any' (==1000) (take' 100 numbers)
 -- False
 any' :: (a -> Bool) -> List a -> Bool
-any' = error "No implementado"
+any' p = foldr' (\x acc -> if p x then True else acc) False
 
 -- | 'all'' toma un predicado y una lista y devuelve verdadero si el predicado
 -- se cumple para todos los elementos de la lista
@@ -517,7 +548,7 @@ any' = error "No implementado"
 -- >>> all' (>0) Empty
 -- True
 all' :: (a -> Bool) -> List a -> Bool
-all' = error "No implementado"
+all' p = foldr' (\x acc -> if p x then acc else False) True
 
 -- | 'elem'' x xs devuelve verdadero si x está en xs y falso en caso contrario
 --
@@ -533,7 +564,7 @@ all' = error "No implementado"
 -- >>> 0 `elem'` Empty
 -- False
 elem' :: (Eq a) => a -> List a -> Bool
-elem' = error "No implementado"
+elem' x = foldr' (\y acc -> if x == y then True else acc) False
 
 -- | 'notElem'' x xs devuelve falso si x está en xs y verdadero en caso contrario
 --
@@ -549,7 +580,7 @@ elem' = error "No implementado"
 -- >>> 0 `notElem'` Empty
 -- True
 notElem' :: (Eq a) => a -> List a -> Bool
-notElem' = error "No implementado"
+notElem' x = foldr' (\y acc -> if x == y then False else acc) True
 
 -- | 'find'' recibe un predicado y una lista y devuelve el primer elemento de
 -- la lista que cumple ese predicado, o Nothing en caso contrario
@@ -565,7 +596,7 @@ notElem' = error "No implementado"
 -- >>> find' even Empty
 -- Nothing
 find' :: (a -> Bool) -> List a -> Maybe a
-find' = error "No implementado"
+find' p = foldr' (\x acc -> if p x then Just x else acc) Nothing
 
 -- | 'fst'' devuelve el primer elemento de un par
 --
@@ -578,7 +609,7 @@ find' = error "No implementado"
 -- >>> fst' (Pair Empty Nothing)
 -- []
 fst' :: Pair a b -> a
-fst' pair = error "No implementado"
+fst' (Pair a _) = a
 
 -- | 'snd'' devuelve el segundo elemento de un par
 --
@@ -591,7 +622,7 @@ fst' pair = error "No implementado"
 -- >>> snd' (Pair Empty Nothing)
 -- Nothing
 snd' :: Pair a b -> b
-snd' pair = error "No implementado"
+snd' (Pair _ b) = b
 
 -- | 'zip'' recibe dos listas y devuelve una lista de pares
 --
@@ -606,7 +637,9 @@ snd' pair = error "No implementado"
 -- >>> zip' Empty Empty
 -- []
 zip' :: List a -> List b -> List (Pair a b)
-zip' xs ys = error "No implementado"
+zip' Empty  _ = Empty
+zip' _ Empty  = Empty
+zip' (x ::: xs) (y ::: ys) = (Pair x y) ::: zip' xs ys
 
 -- | 'unzip'' recibe una lista de pares y devuelve un par de listas
 --
@@ -622,7 +655,10 @@ zip' xs ys = error "No implementado"
 -- >>> unzip' (zip' numbers letters) == Pair numbers letters
 -- True
 unzip' :: List (Pair a b) -> Pair (List a) (List b)
-unzip' xs = error "No implementado"
+unzip' Empty = Pair Empty Empty
+unzip' ((Pair a b) ::: xs) = Pair (a ::: as) (b ::: bs)
+  where
+    (Pair as bs) = unzip' xs
 
 -- | 'lookup'' busca una clave entre los primeros elementos de una lista de
 -- pares y devuelve el segundo elemento encerrado en un Just, o Nothing si
@@ -644,7 +680,10 @@ unzip' xs = error "No implementado"
 -- >>> lookup' 'c' Empty
 -- Nothing
 lookup' :: (Eq k) => k -> List (Pair k v) -> Maybe v
-lookup' = error "No implementado"
+lookup' _ Empty = Nothing
+lookup' k ((Pair k' v) ::: xs)
+  | k == k'   = Just v
+  | otherwise = lookup' k xs
 
 -- | 'zipWith'' toma una función que acepta dos parámetros, y dos listas
 -- y devuelve una nueva lista que resulta unir las otras dos mediante la función
@@ -664,7 +703,9 @@ lookup' = error "No implementado"
 -- >>> zipWith' (*) Empty Empty
 -- []
 zipWith' :: (a -> b -> c) -> List a -> List b -> List c
-zipWith' = error "No implementado"
+zipWith' _ Empty _ = Empty
+zipWith' _ _ Empty = Empty
+zipWith' f (x ::: xs) (y ::: ys) = f x y ::: zipWith' f xs ys
 
 -- | 'takeWhile'' toma un predicado y una función y devuelve el prefijo más
 -- largo de la lista para el cual se verifica el predicado
@@ -684,7 +725,10 @@ zipWith' = error "No implementado"
 -- >>> takeWhile' odd Empty
 -- []
 takeWhile' :: (a -> Bool) -> List a -> List a
-takeWhile' p xs = error "No implementado"
+takeWhile' _ Empty = Empty
+takeWhile' p (x ::: xs)
+  | p x = x ::: takeWhile' p xs
+  | otherwise = Empty
 
 -- | 'dropWhile'' toma un predicado y una función y descarta el prefijo más
 -- largo de la lista para el cual se verifica el predicado
@@ -704,7 +748,10 @@ takeWhile' p xs = error "No implementado"
 -- >>> dropWhile' odd Empty
 -- []
 dropWhile' :: (a -> Bool) -> List a -> List a
-dropWhile' p xs = error "No implementado"
+dropWhile' _ Empty = Empty
+dropWhile' p (x ::: xs)
+  | p x = dropWhile' p xs
+  | otherwise = x ::: xs
 
 -- | 'span'', toma un predicado p y una lista xs, y devuelve una tupla en la que
 -- el primer elemento contiene los primeros elementos de xs que satisfacen p,
@@ -725,7 +772,12 @@ dropWhile' p xs = error "No implementado"
 -- >>> span' odd Empty
 -- ([],[])
 span' :: (a -> Bool) -> List a -> Pair (List a) (List a)
-span' p xs = error "No implementado"
+span' _ Empty = Pair Empty Empty
+span' p (x ::: xs)
+  | p x = Pair (x ::: cumplen) resto
+  | otherwise = Pair Empty (x ::: xs)
+    where
+      (Pair cumplen resto) = span' p xs
 
 -- | 'partition'' toma un predicado y una lista y devuelve un par de listas
 -- la primera de los cuales contiene los elementos que satisfacen el predicado
@@ -746,7 +798,12 @@ span' p xs = error "No implementado"
 -- >>> partition' odd Empty
 -- ([],[])
 partition' :: (a -> Bool) -> List a -> Pair (List a) (List a)
-partition' p xs = error "No implementado"
+partition' _ Empty = Pair Empty Empty
+partition' p (x ::: xs)
+  | p x = Pair (x ::: cumplen) noCumplen
+  | otherwise = Pair cumplen (x ::: noCumplen)
+    where
+      (Pair cumplen noCumplen) = partition' p xs
 
 -- | 'iterate'' toma una función y un valor inicial, y devuelve una lista
 -- infinita que resulta de la aplicación repetida de la función sobre el valor -- inicial
@@ -760,4 +817,4 @@ partition' p xs = error "No implementado"
 -- >>> take' 5 (iterate' (\x -> succ(head' x):::x) ('a':::Empty))
 -- [['a'],['b','a'],['c','b','a'],['d','c','b','a'],['e','d','c','b','a']]
 iterate' :: (a -> a) -> a -> List a
-iterate' f x = error "No implementado"
+iterate' f x = x ::: iterate' f (f x)

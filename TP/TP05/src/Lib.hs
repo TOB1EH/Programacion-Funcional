@@ -116,7 +116,8 @@ product' = foldr (*) 1
 -- prop> \xs -> xs == reverse' (reverse' xs)
 -- +++ OK, passed 100 tests.
 reverse' :: [a] -> [a]
-reverse' = foldr (\x acc -> acc ++ [x]) []
+reverse' = foldl (flip (:)) []
+-- reverse' = foldr (\x acc -> acc ++ [x]) []
 
 -- foldr (\x acc -> acc ++ [x]) [] [1,2,3]
 --   = (\x acc -> acc ++ [x]) 1 (foldr (\x acc -> acc ++ [x]) [] [2,3])
@@ -148,8 +149,9 @@ reverse' = foldr (\x acc -> acc ++ [x]) []
 -- ... empty list
 -- ...
 maximum' :: (Ord a) => [a] -> a
-maximum' [] = error "empty list"
-maximum' (x:xs) = foldl max x xs
+-- maximum' [] = error "empty list"
+-- maximum' (x:xs) = foldl max x xs
+maximum' = foldl1 max
 
 -- | 'minimum'' devuelve el minimo de una lista de elementos
 --
@@ -169,8 +171,9 @@ maximum' (x:xs) = foldl max x xs
 -- ... empty list
 -- ...
 minimum' :: (Ord a) => [a] -> a
-minimum' [] = error "empty list"
-minimum' (x:xs) = foldl min x xs
+-- minimum' [] = error "empty list"
+-- minimum' (x:xs) = foldl min x xs
+minimum' = foldl1 min
 
 -- | 'map'' toma una función y una lista y aplica esa función a cada elemento
 -- de la lista.

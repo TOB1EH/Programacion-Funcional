@@ -32,7 +32,10 @@ object Practico7:
     * val res2: Int = 999
     * }}}
     */
-  def length[T](xs: List[T]): Int = ???
+  def length[T](xs: List[T]): Int =
+    def contar(i: Int, xs: List[T]): Int =
+      if xs.isEmpty then i else contar(i+1, xs.tail)
+    contar(0, xs)
 
   /** Calcula la suma de los elementos de una lista de enteros.
     *
@@ -54,7 +57,10 @@ object Practico7:
     * val res7: Int = 500
     * }}}
     */
-  def sum(xs: List[Int]): Int = ???
+  def sum(xs: List[Int]): Int =
+    def sumar(i: Int, xs: List[Int]): Int =
+      if xs.isEmpty then i else sumar(xs.head+i, xs.tail)
+    sumar(0, xs)
 
   /** Devuelve el elemento más grande de una lista de enteros.
     *
@@ -84,7 +90,10 @@ object Practico7:
     * ...
     * }}}
     */
-  def max(xs: List[Int]): Int = ???
+  def max(xs: List[Int]): Int =
+    def mayor(i: Int, xs: List[Int]): Int =
+      if xs.isEmpty then i else if xs.head > i then mayor(xs.head, xs.tail) else mayor(i, xs.tail)
+    mayor(xs.head, xs.tail)
 
   /** Devuelve el factorial de un número.
     *
@@ -109,7 +118,11 @@ object Practico7:
     * ...
     * }}}
     */
-  def factorial(n: Int): BigInt = ???
+  def factorial(n: Int): BigInt =
+    if n < 0 then throw new IllegalArgumentException("requirement failed")
+    def fact(i: BigInt, n: Int): BigInt =
+      if n == 0 then i else fact(i*n, n-1)
+    fact(1, n)
 
   /** Devuelve el enésimo número de Fibonacci.
     *
@@ -138,7 +151,11 @@ object Practico7:
     * ...
     * }}}
     */
-  def fibo(n: Int): BigInt = ???
+  def fibo(n: Int): BigInt =
+    if n < 0 then throw new IllegalArgumentException("requirement failed")
+    def fib(a: BigInt, b: BigInt, n: Int): BigInt =
+      if n == 0 then a else fib(b, a+b, n-1)
+    fib(0, 1, n)
 
   /** Calcula potencias enteras no negativas de enteros.
     *
@@ -166,7 +183,11 @@ object Practico7:
     * ...
     * }}}
     */
-  def pow(x: BigInt, n: Int): BigInt = ???
+  def pow(x: BigInt, n: Int): BigInt =
+    if n < 0 then throw new IllegalArgumentException("requirement failed")
+    def potencia(i: BigInt, n: Int): BigInt =
+      if n == 0 then i else potencia(i*x, n-1)
+    potencia(1, n)
 
   /** Calcula la suma de enteros contenidos en un rango.
     *
@@ -191,7 +212,10 @@ object Practico7:
     * val res3: BigInt = 5
     * }}}
     */
-  def sumrange(a: BigInt, b: BigInt): BigInt = ???
+  def sumrange(a: BigInt, b: BigInt): BigInt =
+    def sumador(i: BigInt, j: BigInt): BigInt =
+      if j > b then i else sumador(i+j, j+1)
+    sumador(0, a)
 
   /** Calcula la suma de los cuadrados de los enteros de un rango.
     *
@@ -213,7 +237,10 @@ object Practico7:
     * val res2: BigInt = 100
     * }}}
     */
-  def sumsquares(a: BigInt, b: BigInt): BigInt = ???
+  def sumsquares(a: BigInt, b: BigInt): BigInt =
+    def sumacuadrados(i: BigInt, j: BigInt): BigInt =
+      if j > b then i else sumacuadrados(i+pow(j, 2), j+1)
+    sumacuadrados(0, a)
 
   /** Calcula la suma de los cubos de los enteros de un rango.
     *
@@ -235,7 +262,10 @@ object Practico7:
     * val res5: BigInt = 1000
     * }}}
     */
-  def sumcubes(a: BigInt, b: BigInt): BigInt = ???
+  def sumcubes(a: BigInt, b: BigInt): BigInt =
+    def sumacubos(i: BigInt, j: BigInt): BigInt =
+      if j > b then i else sumacubos(i+pow(j, 3), j+1)
+    sumacubos(0, a)
 
   /** Calcula la suma de las potencias enésimas de los enteros de un rango.
     *
@@ -266,7 +296,10 @@ object Practico7:
     * ...
     * }}}
     */
-  def sumpowers(a: BigInt, b: BigInt, n: Int): BigInt = ???
+  def sumpowers(a: BigInt, b: BigInt, n: Int): BigInt =
+    def sumapotencias(i: BigInt, j: BigInt): BigInt =
+      if j > b then i else sumapotencias(i+pow(j, n), j+1)
+    sumapotencias(0, a)
 
   /** Calcula las raíces de la ecuación de segundo grado ax^2 + bx + c.
     *
@@ -297,7 +330,14 @@ object Practico7:
       a: Double,
       b: Double,
       c: Double
-  ): ((Double, Double), (Double, Double)) = ???
+  ): ((Double, Double), (Double, Double)) =
+    if a == 0 then throw new IllegalArgumentException("requirement failed")
+    val discriminante = b * b - 4 * a * c
+    if discriminante >= 0 then
+      (((-b + math.sqrt(discriminante)) / (2.0 * a), 0.0), ((-b - math.sqrt(discriminante)) / (2.0 * a), 0.0))
+    else
+      ((-b / (2.0 * a), math.sqrt(-discriminante) / (2.0 * a)), (-b / (2.0 * a), -(math.sqrt(-discriminante)) / (2.0 * a)))
+
 
   /** Determina si los paréntesis en una cadena de caracteres estan balanceados.
     *
@@ -322,7 +362,14 @@ object Practico7:
     * val res3: Boolean = false
     * }}}
     */
-  def balance(chars: String): Boolean = ???
+  def balance(chars: String): Boolean =
+    def revisar(abiertos: Int, contenido: List[Char]): Boolean =
+      if contenido.isEmpty then abiertos == 0
+      else if contenido.head == '(' then revisar(abiertos+1, contenido.tail)
+      else if contenido.head == ')' then
+        if abiertos == 0 then false else revisar(abiertos-1, contenido.tail)
+      else revisar(abiertos, contenido.tail)
+    revisar(0, chars.toList) // chars.toList convierte la cadena de caracteres en una lista de caracteres
 
   def main(args: Array[String]): Unit =
     println(s"Este es el práctico $practico\n")
